@@ -17,7 +17,7 @@ Some tests based on GoogleTest are implemented, so as to test the correct behavi
 
 A qmake project is used to compile the tests, and can be used if you have Qt installed.
 
-Just run `qmake;make` in the main folder, or use the Qt Creator IDE.
+Just run `qmake;make` in the test folder, or use the Qt Creator IDE.
 
 
 
