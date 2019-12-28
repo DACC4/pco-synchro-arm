@@ -33,11 +33,18 @@ class PcoMutex
 {
 public:
 
+
+    ///
+    /// \brief The RecursionMode enum
+    ///
+    enum RecursionMode { Recursive, NonRecursive };
+
+
     ///
     /// \brief PcoMutex constructor
-    /// \param isRecursive Indicates if the mutex is recursive or not
+    /// \param recursionMode Indicates if the mutex is recursive or not
     ///
-    PcoMutex(bool isRecursive = false);
+    PcoMutex(RecursionMode recursionMode = RecursionMode::NonRecursive);
 
     /// No copy
     PcoMutex (const PcoMutex&) = delete;
@@ -79,8 +86,8 @@ protected:
     /// A recursive mutex, when initialized as a recursive mutex
     std::recursive_mutex m_recursiveMutex;
 
-    /// Indicates if the mutex is recursive or not (false by default)
-    const bool m_isRecursive;
+    /// Indicates if the mutex is recursive or not (not recursive by default)
+    const RecursionMode m_recursionMode;
 };
 
 #endif // PCOMUTEX_H

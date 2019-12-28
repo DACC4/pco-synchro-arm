@@ -21,14 +21,14 @@
 #include "pcomanager.h"
 
 
-PcoMutex::PcoMutex(bool isRecursive) : m_isRecursive(isRecursive)
+PcoMutex::PcoMutex(PcoMutex::RecursionMode recursionMode) : m_recursionMode(recursionMode)
 {
 }
 
 void PcoMutex::lock()
 {
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::MutexLock);
-    if (m_isRecursive) {
+    if (m_recursionMode == RecursionMode::Recursive) {
         m_recursiveMutex.lock();
     }
     else {
@@ -40,7 +40,7 @@ void PcoMutex::lock()
 void PcoMutex::unlock()
 {
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::MutexUnlock);
-    if (m_isRecursive) {
+    if (m_recursionMode == RecursionMode::Recursive) {
         m_recursiveMutex.unlock();
     }
     else {

@@ -26,32 +26,7 @@
 #include "../src/pcoconditionvariable.h"
 #include "../src/pcothread.h"
 #include "../src/pcomanager.h"
-
-// Taken here: https://github.com/google/googletest/issues/348
-#define ASSERT_DURATION_LE(secs, stmt) { \
-  std::promise<bool> completed; \
-  auto stmt_future = completed.get_future(); \
-  std::thread([&](std::promise<bool>& completed) { \
-    stmt; \
-    completed.set_value(true); \
-  }, std::ref(completed)).detach(); \
-  if(stmt_future.wait_for(std::chrono::seconds(secs)) == std::future_status::timeout) \
-    GTEST_FATAL_FAILURE_("       timed out (> " #secs \
-    " seconds). Check code for interlocking"); \
-}
-
-#define ASSERT_DURATION_GE(secs, stmt) { \
-  std::promise<bool> completed; \
-  auto stmt_future = completed.get_future(); \
-  std::thread([&](std::promise<bool>& completed) { \
-    stmt; \
-    completed.set_value(true); \
-  }, std::ref(completed)).detach(); \
-  if(stmt_future.wait_for(std::chrono::seconds(secs)) != std::future_status::timeout) \
-    GTEST_FATAL_FAILURE_("       timed out (> " #secs \
-    " seconds). The code finished while it shouldn't"); \
-}
-
+#include "../src/pcotest.h"
 
 TEST(PcoMutex, LockUnlock) {
     // Req: Locking and unlocking an open mutex should not block the caller
@@ -81,7 +56,7 @@ TEST(PcoMutex, RecursiveNotBlocked) {
     // The two locks are in the macro, as they have to be called from
     // the same thread
     ASSERT_DURATION_LE(1, {
-                           PcoMutex mutex(true);
+                           PcoMutex mutex(PcoMutex::Recursive);
                            mutex.lock();
                            mutex.lock();
                        })

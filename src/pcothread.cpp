@@ -17,4 +17,13 @@
  * along with PcoSynchro.  If not, see <https://www.gnu.org/licenses/>.      *
  *****************************************************************************/
 
+#include <chrono>
+
 #include "pcothread.h"
+
+using namespace std::chrono_literals;
+
+void PcoThread::usleep(uint64_t useconds)
+{
+    std::this_thread::sleep_for(1us * useconds);
+}

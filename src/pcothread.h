@@ -76,6 +76,12 @@ public:
         PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadJoin);
     }
 
+    ///
+    /// \brief sleeps for a certain number of microseconds
+    /// \param useconds The number of microseconds to put the thread asleep
+    ///
+    static void usleep(uint64_t useconds);
+
 protected:
 
     /// The internal thread descriptor
