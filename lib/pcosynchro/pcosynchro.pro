@@ -26,4 +26,8 @@ unix {
     includes.path = /usr/local/include/pcosynchro
     includes.files = ../../src/*.h
     INSTALLS    += includes
+
+
+    target.path = /usr/local/lib
+    INSTALLS    += target
 }

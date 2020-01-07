@@ -1,6 +1,6 @@
 #ifndef PCOHOAREMONITOR_H
 #define PCOHOAREMONITOR_H
-#include <pcosynchro/pcosemaphore.h>
+#include "pcosemaphore.h"
 
 /**
  * This class allows to easily create a monitor as defined by Hoare in 1974.
