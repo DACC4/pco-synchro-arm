@@ -39,6 +39,8 @@ public:
     /// \param fn The function to be run by the new thread
     /// \param args The arguments to be sent to the function
     /// The constructor creates and starts the thread automatically.
+    /// A random sleep can be added within the new thread, thanks to the
+    /// PcoManager.
     ///
     /// This constructor is a template, allowing to pass any type of function
     /// and any type of arguments to this function.
@@ -48,10 +50,12 @@ public:
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
-        PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
-        m_thread = std::make_unique<std::thread>(fn, args...);
-        PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
+        m_thread = std::make_unique<std::thread>([&](){
+            PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
+            fn(args...);
+        });
     }
+
 
     /// No copy
     PcoThread (const PcoThread&) = delete;
