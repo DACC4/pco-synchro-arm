@@ -22,8 +22,12 @@
 
 #include <thread>
 #include <memory>
+#include <functional>
 
 #include "pcomanager.h"
+
+template <class T>
+std::decay_t<T> decay_copy(T&& v) { return std::forward<T>(v); }
 
 ///
 /// \brief The PcoThread class
@@ -47,14 +51,20 @@ public:
     /// It corresponds to the same constructor as the one of std::thread :
     /// http://www.cplusplus.com/reference/thread/thread/
     ///
+    /// The usage of std::invoke allows to pass a member function and an
+    /// object to apply the member function, as well as standard functions
+    /// and arguments. It requires c++17 to compile.
+    ///
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
-        m_thread = std::make_unique<std::thread>([&](){
+        m_thread = std::make_unique<std::thread>([=, &fn](){
+    //        m_thread = std::make_unique<std::thread>([&](){
             PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
-            fn(args...);
+            std::invoke(fn,args...);
         });
     }
+
 
 
     /// No copy

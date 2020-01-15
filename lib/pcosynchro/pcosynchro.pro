@@ -3,11 +3,12 @@ CONFIG -= qt
 TEMPLATE = lib
 CONFIG += staticlib
 
-CONFIG += c++14
+CONFIG += c++17
 
 SOURCES += \
     ../../src/pcoconditionvariable.cpp \
     ../../src/pcohoaremonitor.cpp \
+    ../../src/pcologger.cpp \
     ../../src/pcomanager.cpp \
     ../../src/pcomutex.cpp \
     ../../src/pcosemaphore.cpp \
@@ -16,6 +17,7 @@ SOURCES += \
 HEADERS += \
     ../../src/pcoconditionvariable.h \
     ../../src/pcohoaremonitor.h \
+    ../../src/pcologger.h \
     ../../src/pcomanager.h \
     ../../src/pcomutex.h \
     ../../src/pcosemaphore.h \
