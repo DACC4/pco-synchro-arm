@@ -1,5 +1,6 @@
 
-CONFIG += c++14 console
+CONFIG += c++17
+CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 

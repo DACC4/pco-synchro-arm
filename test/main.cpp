@@ -350,6 +350,49 @@ TEST(PcoThread, Arguments) {
     ASSERT_EQ(number, 11);
 }
 
+TEST(PcoThread, stopRequest) {
+    // Req: A thread should be interruptible thanks to a stop request
+
+    int number = 10;
+    bool interrupted = false;
+    PcoThread t2([&](int n){
+        for (int i = 0; i < 10; i++) {
+        std::this_thread::sleep_for(std::chrono::microseconds(1000));
+        if (n == 10) {
+            number ++;
+        }
+
+        if (PcoThread::thisThread()->stopRequested()) {
+            interrupted = true;
+            return;
+        }
+        }
+    }, number);
+
+    // Sleeping in a async is not supported. The test should be written
+    // differently
+    //std::this_thread::sleep_for(std::chrono::microseconds(3500));
+    t2.requestStop();
+
+    t2.join();
+    ASSERT_EQ(interrupted, true);
+    ASSERT_EQ(number, 11);
+}
+
+TEST(PcoThread, thisThread) {
+    // Req: thisThread() should return a pointer for a PcoThread, nullptr else
+
+    PcoThread t1([&](){
+        auto id = PcoThread::thisThread();
+        ASSERT_NE(id, nullptr);
+        });
+
+    auto id = PcoThread::thisThread();
+    ASSERT_EQ(id, nullptr);
+
+    t1.join();
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

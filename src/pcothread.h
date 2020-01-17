@@ -60,8 +60,11 @@ public:
     {
         m_thread = std::make_unique<std::thread>([=, &fn](){
     //        m_thread = std::make_unique<std::thread>([&](){
+            m_id = std::this_thread::get_id();
+            PcoManager::getInstance()->registerThread(this);
             PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
             std::invoke(fn,args...);
+            PcoManager::getInstance()->unregisterThread(this);
         });
     }
 
@@ -96,10 +99,51 @@ public:
     ///
     static void usleep(uint64_t useconds);
 
+    ///
+    /// \brief requests the thread to stop
+    ///
+    /// This function simply modifies an internal boolean. The thread function has
+    /// to check the existence of the request by calling stopRequested().
+    ///
+    void requestStop();
+
+    ///
+    /// \brief checks if there is a stop request
+    /// \return true if there is a stop request, false else
+    ///
+    /// This function can be called from the function executed by the thread,
+    /// thanks to the static function thisThread():
+    ///
+    /// PcoThread::thisThread()->stopRequested()
+    ///
+    bool stopRequested();
+
+    ///
+    /// \brief Returns a pointer to the executing thread
+    /// \return A pointer to the thread from which the function is called
+    ///
+    /// If called from outside of a PcoThread execution, returns nullptr.
+    ///
+    static PcoThread* thisThread();
+
 protected:
+
+    ///
+    /// \brief gets the Id of the actual std::thread
+    /// \return the Id of the actual std::thread
+    ///
+    std::thread::id getId();
+
+    /// The Id of the actual std::thread
+    std::thread::id m_id;
 
     /// The internal thread descriptor
     std::unique_ptr<std::thread> m_thread;
+
+    /// Stores the presence of a stop request
+    bool m_stopRequested{false};
+
+    friend PcoManager;
 };
 
 #endif // PCOTHREAD_H

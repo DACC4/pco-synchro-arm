@@ -27,3 +27,23 @@ void PcoThread::usleep(uint64_t useconds)
 {
     std::this_thread::sleep_for(1us * useconds);
 }
+
+std::thread::id PcoThread::getId()
+{
+    return m_id;
+}
+
+void PcoThread::requestStop()
+{
+    m_stopRequested = true;
+}
+
+bool PcoThread::stopRequested()
+{
+    return m_stopRequested;
+}
+
+PcoThread* PcoThread::thisThread()
+{
+    return PcoManager::getInstance()->thisThread();
+}

@@ -22,6 +22,7 @@
 #include <random>
 
 #include "pcomanager.h"
+#include "pcothread.h"
 
 PcoManager *PcoManager::getInstance()
 {
@@ -55,4 +56,26 @@ void PcoManager::randomSleep(EventType eventType)
     auto randomValue = dis(gen);
     std::chrono::microseconds value(randomValue);
     std::this_thread::sleep_for(value);
+}
+
+
+void PcoManager::registerThread(PcoThread *thread)
+{
+    m_runningThreads[thread->getId()] = thread;
+}
+
+void PcoManager::unregisterThread(PcoThread *thread)
+{
+    m_runningThreads.erase(thread->getId());
+}
+
+PcoThread* PcoManager::thisThread()
+{
+    auto currentId = std::this_thread::get_id();
+    try {
+        return m_runningThreads.at(currentId);
+    }
+    catch (std::out_of_range) {
+        return nullptr;
+    }
 }

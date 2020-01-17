@@ -21,6 +21,9 @@
 #define PCOCOMMON_H
 
 #include <map>
+#include <thread>
+
+class PcoThread;
 
 ///
 /// \brief The PcoManager class
@@ -74,6 +77,11 @@ public:
     ///
     void randomSleep(EventType eventType = EventType::Standard);
 
+    ///
+    /// \brief gets a pointer to the PcoThread executing the call
+    /// \return A pointer to the current PcoThread
+    ///
+    PcoThread* thisThread();
 protected:
 
     ///
@@ -83,8 +91,31 @@ protected:
     ///
     PcoManager();
 
+    ///
+    /// \brief registers the PcoThread in the PcoManager
+    /// \param thread The thread to register
+    ///
+    /// This function has to be called within the newly created thread.
+    /// It updates the internal map of running threads
+    ///
+    void registerThread(PcoThread *thread);
+
+    ///
+    /// \brief unregisters the PcoThread in the PcoManager
+    /// \param thread The thread to unregister
+    ///
+    /// This function has to be called within the thread function,
+    /// just before leaving. It updates the internal map of running threads
+    ///
+    void unregisterThread(PcoThread *thread);
+
     /// Map of sleeping times per type of event
     std::map<EventType, unsigned int> m_usecondsMap;
+
+    /// Map of running threads
+    std::map<std::thread::id, PcoThread *> m_runningThreads;
+
+    friend PcoThread;
 
 };
 
