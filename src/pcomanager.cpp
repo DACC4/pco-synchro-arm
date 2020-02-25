@@ -26,7 +26,7 @@
 
 PcoManager *PcoManager::getInstance()
 {
-    static PcoManager *pcoManager = new PcoManager();
+    static PcoManager* const pcoManager = new PcoManager();
     return pcoManager;
 }
 
@@ -61,21 +61,29 @@ void PcoManager::randomSleep(EventType eventType)
 
 void PcoManager::registerThread(PcoThread *thread)
 {
+    m_mutex.lock();
     m_runningThreads[thread->getId()] = thread;
+    m_mutex.unlock();
 }
 
 void PcoManager::unregisterThread(PcoThread *thread)
 {
+    m_mutex.lock();
     m_runningThreads.erase(thread->getId());
+    m_mutex.unlock();
 }
 
 PcoThread* PcoManager::thisThread()
 {
+    m_mutex.lock();
     auto currentId = std::this_thread::get_id();
     try {
-        return m_runningThreads.at(currentId);
+        PcoThread *result = m_runningThreads.at(currentId);
+        m_mutex.unlock();
+        return result;
     }
     catch (std::out_of_range) {
+        m_mutex.unlock();
         return nullptr;
     }
 }

@@ -22,6 +22,7 @@
 
 #include <map>
 #include <thread>
+#include <mutex>
 
 class PcoThread;
 
@@ -114,6 +115,8 @@ protected:
 
     /// Map of running threads
     std::map<std::thread::id, PcoThread *> m_runningThreads;
+
+    std::mutex m_mutex;
 
     friend PcoThread;
 
