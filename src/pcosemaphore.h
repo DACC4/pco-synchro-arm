@@ -76,7 +76,7 @@ public:
 protected:
 
     /// A queue of condition variables for the waiting queue
-    std::queue<std::condition_variable>  m_waitingCondition;
+    std::queue<std::condition_variable*>  m_waitingCondition;
 
     /// An internal mutex to protect the semaphore value
     std::mutex                           m_mutex;

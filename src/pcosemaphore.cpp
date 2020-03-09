@@ -34,7 +34,7 @@ PcoSemaphore::~PcoSemaphore()
         std::cout << "A PcoSemaphore should not be deleted if a thread is waiting on it" << std::endl;
     }
     while (!m_waitingCondition.empty()) {
-        m_waitingCondition.front().notify_one();
+        m_waitingCondition.front()->notify_one();
         m_waitingCondition.pop();
     }
 }
@@ -46,8 +46,10 @@ void PcoSemaphore::acquire()
         std::unique_lock<std::mutex> acquire(m_mutex);
         m_value --;
         if (m_value < 0) {
-            m_waitingCondition.emplace();
-            m_waitingCondition.back().wait(acquire);
+            std::condition_variable *variable = new std::condition_variable();
+            m_waitingCondition.emplace(variable);
+            variable->wait(acquire);
+            delete variable;
         }
     }
 
@@ -61,7 +63,7 @@ void PcoSemaphore::release()
         std::unique_lock<std::mutex> acquire(m_mutex);
         m_value ++;
         if (m_value <= 0) {
-            m_waitingCondition.front().notify_one();
+            m_waitingCondition.front()->notify_one();
             m_waitingCondition.pop();
         }
     }
