@@ -20,30 +20,45 @@
 #include <thread>
 #include <chrono>
 #include <random>
+#include <mutex>
 
 #include "pcomanager.h"
 #include "pcothread.h"
 
 PcoManager *PcoManager::getInstance()
 {
-    static PcoManager* const pcoManager = new PcoManager();
-    return pcoManager;
+    static PcoManager pcoManager;
+    return &pcoManager;
 }
 
 PcoManager::PcoManager()
 {
+    m_sleepMutex.lock();
     m_usecondsMap[EventType::Standard] = 0.0;
+    m_sleepMutex.unlock();
 }
 
+PcoManager::~PcoManager()
+{
+    m_sleepMutex.lock();
+    m_usecondsMap.clear();
+    m_sleepMutex.unlock();
+    m_mutex.lock();
+    m_runningThreads.clear();
+    m_mutex.unlock();
+}
 
 void PcoManager::setMaxSleepDuration(unsigned int useconds, EventType eventType)
 {
+    m_sleepMutex.lock();
     m_usecondsMap[eventType] = useconds;
+    m_sleepMutex.unlock();
 }
 
 void PcoManager::randomSleep(EventType eventType)
 {
     unsigned int useconds;
+    m_sleepMutex.lock();
     if (m_usecondsMap.count(eventType) > 0) {
         useconds = m_usecondsMap[eventType];
     }
@@ -53,7 +68,6 @@ void PcoManager::randomSleep(EventType eventType)
     static std::random_device rd;  //Will be used to obtain a seed for the random number engine
     static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> dis(0, static_cast<int>(useconds));
-    m_sleepMutex.lock();
     auto randomValue = dis(gen);
     std::chrono::microseconds value(randomValue);
     m_sleepMutex.unlock();

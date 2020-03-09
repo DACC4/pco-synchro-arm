@@ -23,6 +23,8 @@
 #include <map>
 #include <thread>
 #include <mutex>
+#include <random>
+
 
 class PcoThread;
 
@@ -91,6 +93,8 @@ protected:
     /// The constructor is protected, as it is meant to be a singleton.
     ///
     PcoManager();
+
+    ~PcoManager();
 
     ///
     /// \brief registers the PcoThread in the PcoManager

@@ -150,6 +150,8 @@ protected:
     /// Stores the presence of a stop request
     bool m_stopRequested{false};
 
+    std::mutex m_requestMutex;
+
     friend PcoManager;
 };
 
