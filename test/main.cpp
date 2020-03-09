@@ -350,6 +350,60 @@ TEST(PcoThread, Arguments) {
     ASSERT_EQ(number, 11);
 }
 
+class LittleClass
+{
+public:
+    int *number;
+    void run(int i) {
+        (*number) += i;
+    }
+};
+
+TEST(PcoThread, ObjectArgument) {
+    // Req: A thread can execute a member method of an object
+
+    int number = 10;
+    LittleClass *obj = new LittleClass();
+    obj->number = &number;
+    PcoThread t1(&LittleClass::run, obj, 1);
+    t1.join();
+    delete obj;
+    ASSERT_EQ(number, 11);
+}
+
+
+class LittleSelfClass
+{
+public:
+    int *number;
+    PcoThread *myThread;
+    void go() {
+
+        myThread = new PcoThread(&LittleSelfClass::run, this);
+    }
+
+    void join() {
+        myThread->join();
+        delete myThread;
+    }
+
+    void run() {
+        (*number) ++;
+    }
+};
+
+TEST(PcoThread, SelfObjectArgument) {
+    // Req: An object can start a thread on a member method of itself
+
+    int number = 10;
+    LittleSelfClass *obj = new LittleSelfClass();
+    obj->number = &number;
+    obj->go();
+    obj->join();
+    delete obj;
+    ASSERT_EQ(number, 11);
+}
+
 TEST(PcoThread, stopRequest) {
     // Req: A thread should be interruptible thanks to a stop request
 

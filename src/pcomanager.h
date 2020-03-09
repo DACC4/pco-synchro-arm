@@ -118,6 +118,8 @@ protected:
 
     std::mutex m_mutex;
 
+    std::mutex m_sleepMutex;
+
     friend PcoThread;
 
 };

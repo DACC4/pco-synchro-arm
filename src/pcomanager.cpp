@@ -53,8 +53,10 @@ void PcoManager::randomSleep(EventType eventType)
     static std::random_device rd;  //Will be used to obtain a seed for the random number engine
     static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> dis(0, static_cast<int>(useconds));
+    m_sleepMutex.lock();
     auto randomValue = dis(gen);
     std::chrono::microseconds value(randomValue);
+    m_sleepMutex.unlock();
     std::this_thread::sleep_for(value);
 }
 

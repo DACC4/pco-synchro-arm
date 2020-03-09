@@ -26,8 +26,15 @@
 
 #include "pcomanager.h"
 
-template <class T>
-std::decay_t<T> decay_copy(T&& v) { return std::forward<T>(v); }
+//template <class T>
+//std::decay_t<T> decay_copy(T&& v) { return std::forward<T>(v); }
+
+// The following lines check if we really use at least C++17.
+// We need that for std::invoke()
+#ifndef __has_include
+#error "You need C++17 to compile pcosynchro"
+#endif
+
 
 ///
 /// \brief The PcoThread class
