@@ -65,8 +65,7 @@ public:
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
-        m_thread = std::make_unique<std::thread>([=, &fn](){
-    //        m_thread = std::make_unique<std::thread>([&](){
+        m_thread = std::make_unique<std::thread>([=](){
             m_id = std::this_thread::get_id();
             PcoManager::getInstance()->registerThread(this);
             PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
