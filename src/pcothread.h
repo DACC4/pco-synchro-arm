@@ -65,6 +65,18 @@ public:
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
+        if constexpr (std::is_member_function_pointer<decltype(fn)>::value) {
+            createThread1(fn,args...);
+        }
+        else {
+            createThread2(fn, args...);
+        }
+    }
+
+
+    template <class Fn, class... Args>
+    void createThread1 (Fn&& fn, Args&&... args)
+    {
         m_thread = std::make_unique<std::thread>([=](){
             m_id = std::this_thread::get_id();
             PcoManager::getInstance()->registerThread(this);
@@ -74,7 +86,17 @@ public:
         });
     }
 
-
+    template <class Fn, class... Args>
+    void createThread2 (Fn&& fn, Args&&... args)
+    {
+        m_thread = std::make_unique<std::thread>([=, &fn](){
+            m_id = std::this_thread::get_id();
+            PcoManager::getInstance()->registerThread(this);
+            PcoManager::getInstance()->randomSleep(PcoManager::EventType::ThreadCreation);
+            std::invoke(fn,args...);
+            PcoManager::getInstance()->unregisterThread(this);
+        });
+    }
 
     /// No copy
     PcoThread (const PcoThread&) = delete;

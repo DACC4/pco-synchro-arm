@@ -336,7 +336,7 @@ TEST(PcoConditionVariable, Notify4) {
 #endif // ALLOW_HELGRIND_ERRORS
 
 
-TEST(PcoThread, Normal) {
+TEST(PcoThread, Normallambda) {
     // Req: A thread should execute and finish, letting another one do the join
 
     int number = 0;
@@ -349,6 +349,20 @@ TEST(PcoThread, Normal) {
     ASSERT_EQ(number, 1);
 }
 
+void task(int *number)
+{
+    (*number) ++;
+}
+
+TEST(PcoThread, Normal) {
+    // Req: A thread should execute and finish, letting another one do the join
+
+    int number = 0;
+    PcoThread t1(task, &number);
+
+    t1.join();
+    ASSERT_EQ(number, 1);
+}
 
 TEST(PcoThread, Arguments) {
     // Req: A thread should execute and finish, letting another one do the join
