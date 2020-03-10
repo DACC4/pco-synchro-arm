@@ -65,7 +65,7 @@ public:
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
-        if constexpr (std::is_member_function_pointer<decltype(fn)>::value) {
+        if constexpr (std::is_member_function_pointer<Fn>::value) {
             createThread1(fn,args...);
         }
         else {
