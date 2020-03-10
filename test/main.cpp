@@ -391,20 +391,27 @@ class LittleSelfClass
 {
 public:
     int *number;
+    PcoThread *myThread = nullptr;
+
+    LittleSelfClass() : number(nullptr) {}
     // Should work with PcoThread but it does not...
-    std::thread *myThread;
+//    std::thread *myThread;
     void go() {
 
-        myThread = new std::thread(&LittleSelfClass::run, this);
+        LittleSelfClass *c = this;
+        myThread = new PcoThread(&LittleSelfClass::run, this, 1);
     }
 
+
     void join() {
-        myThread->join();
+        if (myThread != nullptr) {
+            myThread->join();
+        }
         delete myThread;
     }
 
-    void run() {
-        (*number) ++;
+    void run(int i) {
+        (*number) = (*number) + i;
     }
 };
 
