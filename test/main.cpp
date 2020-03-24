@@ -400,6 +400,24 @@ TEST(PcoThread, ObjectArgument) {
     ASSERT_EQ(number, 11);
 }
 
+void objectReferenceFunction(LittleClass &obj)
+{
+    (*obj.number) ++;
+
+}
+
+TEST(PcoThread, ObjectArgumentRef) {
+    // Req: A thread can pass an object by reference
+
+    int number = 10;
+    LittleClass obj;
+    obj.number = &number;
+    PcoThread t1(objectReferenceFunction, std::ref(obj));
+    t1.join();
+
+    ASSERT_EQ(number, 11);
+}
+
 
 class LittleSelfClass
 {
@@ -408,11 +426,8 @@ public:
     PcoThread *myThread = nullptr;
 
     LittleSelfClass() : number(nullptr) {}
-    // Should work with PcoThread but it does not...
-//    std::thread *myThread;
-    void go() {
 
-        LittleSelfClass *c = this;
+    void go() {
         myThread = new PcoThread(&LittleSelfClass::run, this, 1);
     }
 
