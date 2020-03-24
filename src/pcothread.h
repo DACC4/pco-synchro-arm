@@ -62,6 +62,11 @@ public:
     /// object to apply the member function, as well as standard functions
     /// and arguments. It requires c++17 to compile.
     ///
+    /// From http://www.cplusplus.com/reference/thread/thread/ :
+    /// The arguments to the thread function are moved or copied by value.
+    /// If a reference argument needs to be passed to the thread function,
+    /// it has to be wrapped (e.g., with std::ref or std::cref).
+    ///
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
