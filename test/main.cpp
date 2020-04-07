@@ -125,7 +125,6 @@ TEST(PcoSemaphore, NotBlocked) {
     ASSERT_DURATION_LE(1,PcoSemaphore sem(3);sem.acquire();sem.acquire();sem.acquire())
 }
 
-
 TEST(PcoSemaphore, Order) {
     // Req: The releases on a semaphore are done in FIFO order
 
@@ -498,6 +497,42 @@ TEST(PcoThread, thisThread) {
 
     t1.join();
 }
+
+// The following test exposes an error in helgrind.
+// No way to find why...
+
+#ifdef ALLOW_HELGRIND_ERRORS
+class SimpleClass
+{
+public:
+    int i;
+};
+
+TEST(PcoThread, lambdaref) {
+    // Req: A lambda should be able to access a class
+    std::shared_ptr<SimpleClass> obj = std::make_shared<SimpleClass>();
+
+    std::mutex mutex;
+
+    obj->i = 10;
+    PcoThread t0([=, & mutex](){
+        mutex.lock();
+        obj->i ++;
+        mutex.unlock();
+    });
+
+    PcoThread t1([=, & mutex](){
+        mutex.lock();
+        obj->i ++;
+        mutex.unlock();
+    });
+
+    t0.join();
+    t1.join();
+    ASSERT_EQ(obj->i, 12);
+}
+#endif // ALLOW_HELGRIND_ERRORS
+
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
