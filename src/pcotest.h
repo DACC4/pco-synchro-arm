@@ -7,7 +7,7 @@
 #define ASSERT_DURATION_LE(secs, stmt) { \
     std::promise<bool> completed; \
     auto stmt_future = completed.get_future(); \
-    std::thread thread([&completed] { \
+    std::thread thread([&] { \
     stmt; \
     completed.set_value(true); \
     }); \
