@@ -11,9 +11,11 @@
     stmt; \
     completed.set_value(true); \
     }); \
-    if(stmt_future.wait_for(std::chrono::seconds(secs)) == std::future_status::timeout) \
+    if(stmt_future.wait_for(std::chrono::seconds(secs)) == std::future_status::timeout) { \
+    thread.detach(); \
     GTEST_FATAL_FAILURE_("       timed out (> " #secs \
     " seconds). Check code for interlocking"); \
+    } \
     else \
          thread.join(); \
     }
