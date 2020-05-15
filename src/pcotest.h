@@ -28,8 +28,7 @@
     completed.set_value(true); \
     }, std::ref(completed)).detach(); \
     if(stmt_future.wait_for(std::chrono::seconds(secs)) != std::future_status::timeout) \
-    GTEST_FATAL_FAILURE_("       timed out (> " #secs \
-    " seconds). The code finished while it shouldn't"); \
+    GTEST_FATAL_FAILURE_("       The code finished while it shouldn't"); \
     }
 
 
