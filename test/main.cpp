@@ -335,6 +335,56 @@ TEST(PcoConditionVariable, Notify4) {
 #endif // ALLOW_HELGRIND_ERRORS
 
 
+TEST(PcoConditionVariable, WaitFor1) {
+    // Req: A thread waiting on a condition variable with timeout is released
+    // by notifyOne() called from outside the critical section within the
+    // waiting time duration returns true
+
+    PcoMutex mutex;
+    PcoConditionVariable cond;
+
+    std::thread t1([&](){
+        mutex.lock();
+        bool result = cond.waitForSeconds(&mutex,1);
+        ASSERT_EQ(result, true);
+        mutex.unlock();
+    });
+
+    std::thread t2([&](){
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        cond.notifyOne();
+    });
+
+    t1.join();
+    t2.join();
+}
+
+
+TEST(PcoConditionVariable, WaitFor2) {
+    // Req: A thread waiting on a condition variable with timeout is released
+    // by notifyOne() called from outside the critical section outside the
+    // waiting time duration returns false
+
+    PcoMutex mutex;
+    PcoConditionVariable cond;
+
+    std::thread t1([&](){
+        mutex.lock();
+        bool result = cond.waitForSeconds(&mutex,1);
+        ASSERT_EQ(result, false);
+        mutex.unlock();
+    });
+
+    std::thread t2([&](){
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        cond.notifyOne();
+    });
+
+    t1.join();
+    t2.join();
+}
+
+
 TEST(PcoThread, Normallambda) {
     // Req: A thread should execute and finish, letting another one do the join
 

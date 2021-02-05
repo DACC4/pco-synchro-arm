@@ -75,6 +75,22 @@ public:
     ///
     void notifyAll();
 
+
+    ///
+    /// \brief Blocks the current thread for at most a certain duration
+    /// \param mutex The mutex to unlock() and to lock() again
+    /// \param seconds The maximum number of seconds to wait
+    ///
+    /// This method blocks the caller. Before blocking, it unlocks the mutex
+    /// passed as argument.
+    /// When the thread is awaken, it has to compete to reaquire the mutex
+    /// before continuing.
+    /// The thread waits for at most a certain amount of seconds. If the
+    /// thread has not been awakened during that duration, the function
+    /// returns
+    ///
+    bool waitForSeconds(PcoMutex *mutex, int seconds);
+
 protected:
 
     /// Condition variable used to block the threads

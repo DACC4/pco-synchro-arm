@@ -39,6 +39,28 @@ void PcoConditionVariable::wait(PcoMutex *mutex)
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionWait);
 }
 
+
+bool PcoConditionVariable::waitForSeconds(PcoMutex *mutex, int seconds)
+{
+    bool result = true;
+    PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionWait);
+    {
+        std::unique_lock<std::mutex> lk(m_mutex);
+        m_nbWaiting ++;
+        // It is very important to keep this unlock within the critical section
+        // protected by m_mutex, so the unlock() and the waiting are kind of
+        // an atomic operation
+        mutex->unlock();
+        if (m_waitingCondition.wait_for(lk, std::chrono::seconds(seconds)) == std::cv_status::timeout) {
+            result = false;
+        }
+    }
+    PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionWait);
+    mutex->lock();
+    PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionWait);
+    return result;
+}
+
 void PcoConditionVariable::notifyOne()
 {
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionNotify);
