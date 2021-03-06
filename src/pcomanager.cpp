@@ -98,7 +98,7 @@ PcoThread* PcoManager::thisThread()
         m_mutex.unlock();
         return result;
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range&) {
         m_mutex.unlock();
         return nullptr;
     }
