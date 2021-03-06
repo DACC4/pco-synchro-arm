@@ -428,6 +428,92 @@ TEST(PcoThread, Arguments) {
     ASSERT_EQ(number, 11);
 }
 
+TEST(PcoThread, ArgumentsRef1) {
+    // Req: A thread should execute and finish, letting another one do the join
+    std::vector<PcoThread *> threads;
+      // Flags used for testing
+    std::vector<long int> flags(10, 0);
+    std::vector<int> idxs(10);
+    iota(idxs.begin(), idxs.end(), 0);
+    for (int idx : idxs)
+        threads.push_back(new PcoThread([idx, &flags]() { // idx should be passed by value.
+            usleep(1000); // Ensure all threads are enqueued before start processing.
+            flags[idx] = 1; // Log the index received by this thread.
+        }));
+    // Wait for threads to finish.
+    for_each(threads.begin(), threads.end(), [](auto t){ t->join(); delete t; });
+    // Verify all threads received the right value.
+    for (const auto & value : flags) {
+        ASSERT_EQ(value, 1);
+    }
+}
+
+TEST(PcoThread, ArgumentsRef2) {
+    // Req: A thread should execute and finish, letting another one do the join
+    std::vector<PcoThread *> threads;
+      // Flags used for testing
+    std::vector<long int> flags(10, 0);
+    std::vector<int> idxs(10);
+    iota(idxs.begin(), idxs.end(), 0);
+    for (int idx : idxs)
+        threads.push_back(new PcoThread([=, &flags]() { // idx should be passed by value.
+            usleep(1000); // Ensure all threads are enqueued before start processing.
+            std::cout << idx << std::endl;
+            flags[idx] = 1; // Log the index received by this thread.
+        }));
+    // Wait for threads to finish.
+    for_each(threads.begin(), threads.end(), [](auto t){ t->join(); delete t; });
+    // Verify all threads received the right value.
+    for (const auto & value : flags) {
+        ASSERT_EQ(value, 1);
+    }
+}
+
+
+TEST(PcoThread, ArgumentsRef3) {
+    // Req: A thread should execute and finish, letting another one do the join
+    std::vector<PcoThread *> threads;
+      // Flags used for testing
+    std::vector<long int> flags(10, 0);
+    std::vector<int> idxs(10);
+    iota(idxs.begin(), idxs.end(), 0);
+    for (int idx : idxs)
+        threads.push_back(new PcoThread([&flags](int id) { // idx should be passed by value.
+            usleep(100); // Ensure all threads are enqueued before start processing.
+            flags[id] = 1; // Log the index received by this thread.
+        }, idx));
+    // Wait for threads to finish.
+    for_each(threads.begin(), threads.end(), [](auto t){ t->join(); delete t; });
+    // Verify all threads received the right value.
+    for (const auto & value : flags) {
+        ASSERT_EQ(value, 1);
+    }
+}
+
+void setVectorIndexToOne(std::vector<long int> &vec, int index)
+{
+    vec[index] = 1;
+    usleep(100); // Ensure all threads are enqueued before start processing.
+}
+
+TEST(PcoThread, ArgumentsRefExtern) {
+    // Req: A thread should execute and finish, letting another one do the join
+    std::vector<PcoThread *> threads;
+      // Flags used for testing
+    std::vector<long int> flags(10, 0);
+    std::vector<int> idxs(10);
+    iota(idxs.begin(), idxs.end(), 0);
+    for (int idx : idxs) {
+        threads.push_back(new PcoThread(setVectorIndexToOne,std::ref(flags), idx));
+    }
+    // Wait for threads to finish.
+    for_each(threads.begin(), threads.end(), [](auto t){ t->join(); delete t; });
+    // Verify all threads received the right value.
+    for (const auto & value : flags) {
+        ASSERT_EQ(value, 1);
+    }
+}
+
 class LittleClass
 {
 public:
