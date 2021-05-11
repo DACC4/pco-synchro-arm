@@ -23,7 +23,7 @@
 #include "pcomanager.h"
 
 
-PcoSemaphore::PcoSemaphore(unsigned int n) : m_value(static_cast<int>(n))
+PcoSemaphore::PcoSemaphore(unsigned int n, bool monitor) : m_value(static_cast<int>(n)), m_monitor(monitor)
 {
 }
 
@@ -48,6 +48,9 @@ void PcoSemaphore::acquire()
         if (m_value < 0) {
             std::condition_variable *variable = new std::condition_variable();
             m_waitingCondition.emplace(variable);
+            if (m_monitor) {
+                PcoManager::getInstance()->addWaitingThread();
+            }
             variable->wait(acquire);
             delete variable;
         }
@@ -65,6 +68,9 @@ void PcoSemaphore::release()
         if (m_value <= 0) {
             m_waitingCondition.front()->notify_one();
             m_waitingCondition.pop();
+            if (m_monitor) {
+                PcoManager::getInstance()->removeWaitingThread();
+            }
         }
     }
 

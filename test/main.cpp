@@ -385,7 +385,7 @@ TEST(PcoConditionVariable, WaitFor2) {
 }
 
 
-TEST(PcoThread, Normallambda) {
+TEST(PcoThread, LambdaRef) {
     // Req: A thread should execute and finish, letting another one do the join
 
     int number = 0;
@@ -398,12 +398,13 @@ TEST(PcoThread, Normallambda) {
     ASSERT_EQ(number, 1);
 }
 
+
 void task(int *number)
 {
     (*number) ++;
 }
 
-TEST(PcoThread, Normal) {
+TEST(PcoThread, FunctionPointer) {
     // Req: A thread should execute and finish, letting another one do the join
 
     int number = 0;
@@ -413,7 +414,24 @@ TEST(PcoThread, Normal) {
     ASSERT_EQ(number, 1);
 }
 
-TEST(PcoThread, Arguments) {
+
+
+void taskRef(int &number)
+{
+    number ++;
+}
+
+TEST(PcoThread, FunctionRef) {
+    // Req: A thread should execute and finish, letting another one do the join
+
+    int number = 0;
+    PcoThread t1(taskRef, std::ref(number));
+
+    t1.join();
+    ASSERT_EQ(number, 1);
+}
+
+TEST(PcoThread, lambdaArgValue) {
     // Req: A thread should execute and finish, letting another one do the join
 
     int number = 10;

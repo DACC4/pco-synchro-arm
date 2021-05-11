@@ -27,6 +27,28 @@
 
 
 class PcoThread;
+class PcoMutex;
+class PcoSemaphore;
+class PcoConditionVariable;
+
+///
+/// \brief The PcoWatchDog class
+///
+/// This abstract class has to be derived and set to the PcoManager.
+/// Then the trigger function is called whenever a thread blocks on
+/// a condition variable or a semaphore.
+class PcoWatchDog
+{
+public:
+    ///
+    /// \brief trigger
+    /// \param nbBlocked Number of thread blocked on a synchronization primitive.
+    ///
+    /// nbBlocked represents the number of threads blocked on any
+    /// PcoSemaphore or PcoConditionVariable monitored.
+    ///
+    virtual void trigger(int nbBlocked) = 0;
+};
 
 ///
 /// \brief The PcoManager class
@@ -85,6 +107,27 @@ public:
     /// \return A pointer to the current PcoThread
     ///
     PcoThread* thisThread();
+
+    ///
+    /// \brief nbBlockedThreads
+    /// \return The number of threads in a blocked state
+    ///
+    /// This value represents the number of threads that are blocked on:
+    /// - PcoMutex::lock()
+    /// - PcoSemaphore::acquire()
+    /// - PcoConditionVariable::wait()
+    ///
+    int nbBlockedThreads();
+
+    ///
+    /// \brief setWatchDog
+    /// \param watchDog A watchdog object that will be notified whenever necessary
+    ///
+    /// The watchdog will be notified whenever a thread blocks on a
+    /// semaphore or a condition variable.
+    ///
+    void setWatchDog(PcoWatchDog *watchDog);
+
 protected:
 
     ///
@@ -114,17 +157,43 @@ protected:
     ///
     void unregisterThread(PcoThread *thread);
 
+    ///
+    /// \brief addWaitingThread
+    ///
+    /// Increments the number of waiting threads. To be called just before the
+    /// threads goes to blocked status.
+    ///
+    void addWaitingThread();
+
+    ///
+    /// \brief removeWaitingThread
+    ///
+    /// Decrements the number of waiting threads. To be called just after the thread
+    /// has been waken up.
+    void removeWaitingThread();
+
     /// Map of sleeping times per type of event
     std::map<EventType, unsigned int> m_usecondsMap;
 
     /// Map of running threads
     std::map<std::thread::id, PcoThread *> m_runningThreads;
 
+    /// Mutex to protect m_runningThreads
     std::mutex m_mutex;
 
+    /// Mutex to protect the sleeping part of the methods
     std::mutex m_sleepMutex;
 
+    /// Number of threads currently in a blocked state
+    int m_nbBlockedThreads{0};
+
+    /// A watchdog called when a thread blocks on a synchronization object
+    PcoWatchDog *m_watchDog{nullptr};
+
     friend PcoThread;
+    friend PcoMutex;
+    friend PcoSemaphore;
+    friend PcoConditionVariable;
 
 };
 

@@ -35,8 +35,13 @@ class PcoConditionVariable
 {
 public:
 
-    /// Default constructor
-    PcoConditionVariable() = default;
+    /// \brief PcoConditionVariable
+    /// \param monitor Indicates if the blocked thread list has to be monitored
+    ///
+    /// The only parameter allows to monitor the status of the waiting list.
+    /// If yes, then a monitoring object (interacting with the PcoManager)
+    /// is noticed whenever a thread blocks on this semaphore.
+    PcoConditionVariable(bool monitor = true);
 
     /// No copy
     PcoConditionVariable (const PcoConditionVariable&) = delete;
@@ -101,6 +106,9 @@ protected:
 
     /// Number of waiting threads. Not really necessary, but good for optimization
     int m_nbWaiting{0};
+
+    /// Indicates if the condition variable's waiting list is monitored
+    bool m_monitor;
 
 };
 

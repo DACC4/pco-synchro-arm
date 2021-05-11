@@ -21,6 +21,8 @@
 
 #include "pcomanager.h"
 
+PcoConditionVariable::PcoConditionVariable(bool monitor) : m_monitor(monitor)
+{}
 
 void PcoConditionVariable::wait(PcoMutex *mutex)
 {
@@ -32,6 +34,11 @@ void PcoConditionVariable::wait(PcoMutex *mutex)
         // protected by m_mutex, so the unlock() and the waiting are kind of
         // an atomic operation
         mutex->unlock();
+
+        if (m_monitor) {
+            PcoManager::getInstance()->addWaitingThread();
+        }
+
         m_waitingCondition.wait(lk);
     }
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionWait);
@@ -51,6 +58,11 @@ bool PcoConditionVariable::waitForSeconds(PcoMutex *mutex, int seconds)
         // protected by m_mutex, so the unlock() and the waiting are kind of
         // an atomic operation
         mutex->unlock();
+
+        if (m_monitor) {
+            PcoManager::getInstance()->addWaitingThread();
+        }
+
         if (m_waitingCondition.wait_for(lk, std::chrono::seconds(seconds)) == std::cv_status::timeout) {
             result = false;
         }
@@ -68,6 +80,11 @@ void PcoConditionVariable::notifyOne()
     if (m_nbWaiting > 0) {
         m_nbWaiting --;
         m_waitingCondition.notify_one();
+
+        if (m_monitor) {
+            PcoManager::getInstance()->removeWaitingThread();
+        }
+
     }
     m_mutex.unlock();
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionNotify);
@@ -79,6 +96,13 @@ void PcoConditionVariable::notifyAll()
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::WaitConditionNotifyAll);
     m_mutex.lock();
     if (m_nbWaiting > 0) {
+        for (int i = 0; i < m_nbWaiting; i++) {
+
+            if (m_monitor) {
+                PcoManager::getInstance()->removeWaitingThread();
+            }
+
+        }
         m_nbWaiting = 0;
         m_waitingCondition.notify_all();
     }

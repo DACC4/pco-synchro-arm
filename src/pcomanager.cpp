@@ -103,3 +103,36 @@ PcoThread* PcoManager::thisThread()
         return nullptr;
     }
 }
+
+#include <iostream>
+
+void PcoManager::addWaitingThread()
+{
+    m_mutex.lock();
+    m_nbBlockedThreads ++;
+    int nbBlocked = m_nbBlockedThreads;
+    if (m_watchDog != nullptr) {
+        m_watchDog->trigger(nbBlocked);
+    }
+    m_mutex.unlock();
+}
+
+void PcoManager::removeWaitingThread()
+{
+    m_mutex.lock();
+    m_nbBlockedThreads --;
+    m_mutex.unlock();
+}
+
+int PcoManager::nbBlockedThreads()
+{
+    m_mutex.lock();
+    int result = m_nbBlockedThreads;
+    m_mutex.unlock();
+    return result;
+}
+
+void PcoManager::setWatchDog(PcoWatchDog *watchDog)
+{
+    m_watchDog = watchDog;
+}

@@ -38,8 +38,13 @@ public:
     ///
     /// \brief PcoSemaphore
     /// \param n The initial value of the semaphore, a positive integer
+    /// \param monitor Indicates if the blocked thread list has to be monitored
     ///
-    PcoSemaphore(unsigned int n = 0);
+    /// The second parameter allows to monitor the status of the waiting list.
+    /// If yes, then a monitoring object (interacting with the PcoManager)
+    /// is noticed whenever a thread blocks on this semaphore.
+    ///
+    PcoSemaphore(unsigned int n = 0, bool monitor = true);
 
     /// No copy
     PcoSemaphore (const PcoSemaphore&) = delete;
@@ -83,6 +88,9 @@ protected:
 
     /// The semaphore value
     int                                 m_value;
+
+    /// Indicates if the semaphore's waiting list is monitored
+    bool m_monitor;
 };
 
 
