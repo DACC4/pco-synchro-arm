@@ -128,6 +128,16 @@ public:
     ///
     void setWatchDog(PcoWatchDog *watchDog);
 
+    void setNormalMode();
+    void setFreeMode();
+
+    enum class Mode {
+        Normal,
+        Free
+    };
+
+    Mode getMode();
+
 protected:
 
     ///
@@ -179,7 +189,7 @@ protected:
     std::map<std::thread::id, PcoThread *> m_runningThreads;
 
     /// Mutex to protect m_runningThreads
-    std::mutex m_mutex;
+    std::recursive_mutex m_mutex;
 
     /// Mutex to protect the sleeping part of the methods
     std::mutex m_sleepMutex;
@@ -189,6 +199,14 @@ protected:
 
     /// A watchdog called when a thread blocks on a synchronization object
     PcoWatchDog *m_watchDog{nullptr};
+
+    std::vector<PcoSemaphore *> m_semaphores;
+
+    void registerSemaphore(PcoSemaphore *semaphore);
+    void unregisterSemaphore(PcoSemaphore *semaphore);
+
+    Mode m_mode{Mode::Normal};
+
 
     friend PcoThread;
     friend PcoMutex;

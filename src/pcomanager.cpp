@@ -24,6 +24,7 @@
 
 #include "pcomanager.h"
 #include "pcothread.h"
+#include "pcosemaphore.h"
 
 PcoManager *PcoManager::getInstance()
 {
@@ -87,6 +88,55 @@ void PcoManager::unregisterThread(PcoThread *thread)
     m_mutex.lock();
     m_runningThreads.erase(thread->getId());
     m_mutex.unlock();
+}
+
+void PcoManager::registerSemaphore(PcoSemaphore *semaphore)
+{
+    m_mutex.lock();
+    m_semaphores.push_back(semaphore);
+    m_mutex.unlock();
+}
+
+void PcoManager::unregisterSemaphore(PcoSemaphore *semaphore)
+{
+    m_mutex.lock();
+    auto it = m_semaphores.begin();
+    while (it != m_semaphores.end()) {
+        if (*it == semaphore) {
+            m_semaphores.erase(it);
+            m_mutex.unlock();
+            return;
+        }
+        it++;
+    }
+    m_mutex.unlock();
+}
+
+PcoManager::Mode PcoManager::getMode()
+{
+    m_mutex.lock();
+    auto result = m_mode;
+    m_mutex.unlock();
+    return result;
+}
+
+void PcoManager::setNormalMode()
+{
+    m_mutex.lock();
+    m_mode = Mode::Normal;
+    m_mutex.unlock();
+}
+
+void PcoManager::setFreeMode()
+{
+    m_mutex.lock();
+    m_mode = Mode::Free;
+    m_mutex.unlock();
+    for(auto &sem : m_semaphores) {
+        while (sem->m_value <= 0) {
+            sem->release();
+        }
+    }
 }
 
 PcoThread* PcoManager::thisThread()

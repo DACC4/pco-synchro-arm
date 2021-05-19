@@ -24,6 +24,7 @@
 #include <condition_variable>
 #include <queue>
 
+class PcoManager;
 
 ///
 /// \brief The PcoSemaphore class
@@ -91,6 +92,8 @@ protected:
 
     /// Indicates if the semaphore's waiting list is monitored
     bool m_monitor;
+
+    friend PcoManager;
 };
 
 

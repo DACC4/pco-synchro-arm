@@ -25,10 +25,16 @@
 
 PcoSemaphore::PcoSemaphore(unsigned int n, bool monitor) : m_value(static_cast<int>(n)), m_monitor(monitor)
 {
+    if (m_monitor) {
+        PcoManager::getInstance()->registerSemaphore(this);
+    }
 }
 
 PcoSemaphore::~PcoSemaphore()
 {
+    if (m_monitor) {
+        PcoManager::getInstance()->unregisterSemaphore(this);
+    }
     std::unique_lock<std::mutex> acquire(m_mutex);
     if (m_value < 0) {
         std::cout << "A PcoSemaphore should not be deleted if a thread is waiting on it" << std::endl;
@@ -44,6 +50,9 @@ void PcoSemaphore::acquire()
     PcoManager::getInstance()->randomSleep(PcoManager::EventType::SemaphoreAcquire);
     {
         std::unique_lock<std::mutex> acquire(m_mutex);
+        if (m_monitor && PcoManager::getInstance()->getMode() == PcoManager::Mode::Free) {
+            return;
+        }
         m_value --;
         if (m_value < 0) {
             std::condition_variable *variable = new std::condition_variable();
