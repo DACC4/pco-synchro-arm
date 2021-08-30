@@ -3,52 +3,42 @@
 
 #include <iostream>
 #include <string.h>
+#include <mutex>
+#include <sstream>
 
-class PcoLogger
+///
+/// \brief The PcoLogger class
+///
+/// This class can be used as std::cout, but will avoid any issue of interleaving
+/// in multi-threaded applications.
+///
+/// It shall be used like this:
+///
+/// PcoLogger() << "Hi guys. Here is a number : " << i << std::endl;
+///
+class PcoLogger : public std::ostringstream
 {
-private:
-    PcoLogger() {}
 
 public:
-    static PcoLogger *getInstance(){
-        static PcoLogger logger;
-        return &logger;
-    }
 
-    void setVerbosity(int level) {
-        this->level = level;
-    }
+    /// Default constructor
+    PcoLogger() = default;
 
-    template <typename T>
-    PcoLogger& operator <<( T const& value) {
-        if (level > 0) {
-            std::cout << value;
-        }
-        return *this;
-    }
-
-    PcoLogger &operator<<(std::ostream & (*manip)(std::ostream &)) {
-        if (level > 0){
-            manip(std::cout);
-        }
-        return *this;
-    }
-
-    void initialize(int argc, char **argv) {
-        if (argc == 2) {
-            if (strcmp(argv[1], "-verbose") == 0) {
-                setVerbosity(1);
-            }
-        }
+    /// The descructor
+    ///
+    /// This method is where the writing to std::cout happens. That's the trick.
+    ///
+    ~PcoLogger()
+    {
+        std::lock_guard<std::mutex> guard(sm_mutex);
+        std::cout << this->str();
     }
 
 private:
-    int level{0};
-};
 
-PcoLogger &logger()
-{
-    return *PcoLogger::getInstance();
-}
+    /// A mutex to protect the writing to std::cout
+    static std::mutex sm_mutex;
+
+};
 
 #endif // PCOLOGGER_H
