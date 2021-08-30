@@ -18,6 +18,10 @@
 ///
 class PcoLogger : public std::ostringstream
 {
+private:
+
+    /// A mutex to protect the writing to std::cout
+    static std::mutex sm_mutex;
 
 public:
 
@@ -27,18 +31,39 @@ public:
     /// The descructor
     ///
     /// This method is where the writing to std::cout happens. That's the trick.
-    ///
     ~PcoLogger()
     {
         std::lock_guard<std::mutex> guard(sm_mutex);
-        std::cout << this->str();
+        if (sm_verbosity > 0) {
+            std::cout << this->str();
+        }
+    }
+
+    /// Sets the verbosity level
+    static void setVerbosity(int level) {
+        sm_verbosity = level;
+    }
+
+    ///
+    /// \brief Initializes the PcoLogger
+    /// \param argc the main program arguments
+    /// \param argv the main program arguments
+    ///
+    /// It parses the main() arguments, and if it finds -verbose
+    ///
+    void initialize(int argc, char **argv) {
+        if (argc == 2) {
+            if (strcmp(argv[1], "-verbose") == 0) {
+                setVerbosity(1);
+            }
+        }
     }
 
 private:
-
-    /// A mutex to protect the writing to std::cout
-    static std::mutex sm_mutex;
-
+    static int sm_verbosity;
 };
+
+// For retro-compabitility with Pco exercices
+#define logger PcoLogger
 
 #endif // PCOLOGGER_H
