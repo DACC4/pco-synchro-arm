@@ -154,8 +154,10 @@ protected:
     /// Stores the presence of a stop request
     bool m_stopRequested{false};
 
+    /// A mutex to protect the variable m_stopRequested
     std::mutex m_requestMutex;
 
+    /// PcoManager is a friend, to simplify its development
     friend PcoManager;
 };
 

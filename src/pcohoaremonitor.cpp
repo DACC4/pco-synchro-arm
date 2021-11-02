@@ -1,7 +1,5 @@
 #include "pcohoaremonitor.h"
 
-PcoHoareMonitor::Condition::Condition() : waitingSem(0, false), nbWaiting(0) {}
-
 PcoHoareMonitor::PcoHoareMonitor() : monitorMutex(1, false), monitorSignale(0, false), monitorNbSignale(0) {}
 
 void PcoHoareMonitor::monitorIn() {

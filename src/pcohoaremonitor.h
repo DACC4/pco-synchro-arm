@@ -2,55 +2,82 @@
 #define PCOHOAREMONITOR_H
 #include "pcosemaphore.h"
 
-/**
- * This class allows to easily create a monitor as defined by Hoare in 1974.
- * It offers functions that allow to define the entry point of the monitor
- * as well as condition variables and the functions needed to use them.
- * It is meant to be a superclass of an actual implementation, as presented
- * in the example.
- */
+///
+/// \brief The PcoHoareMonitor class
+///
+/// This class allows to easily create a monitor as defined by Hoare in 1974.
+/// It offers functions that allow to define the entry point of the monitor
+/// as well as condition variables and the functions needed to use them.
+/// It is meant to be a superclass of an actual implementation, as presented
+/// in the example.
+///
 class PcoHoareMonitor
 {
 protected:
 
+    /// A simple constructor
     PcoHoareMonitor();
 
+    ///
+    /// \brief The Condition class
+    ///
+    /// A condition represents a Hoare condition. It has to be used within
+    /// the monitor, and serves as thread blocker and signaler.
+    ///
     class Condition
     {
+        /// The monitor is a friend to ease its development
         friend PcoHoareMonitor;
 
     public:
-        Condition();
+
+        /// A default constructor
+        Condition() = default;
+
     private:
-        PcoSemaphore waitingSem;
-        int nbWaiting;
+
+        /// An internal semaphore to block the threads
+        PcoSemaphore waitingSem{0, false};
+
+        /// A counter to know how many threads are blocked on the condition
+        int nbWaiting{0};
     };
 
-    /**
-     * This function has to be called at the beginning of each function being
-     * an entry point to the monitor.
-     */
+    ///
+    /// \brief Function to enter into the monitor
+    ///
+    /// This function has to be called at the beginning of each function being
+    /// an entry point to the monitor.
+    ///
     void monitorIn();
 
-    /**
-     * This function has to be called at the end of each function being
-     * an entry point to the monitor.
-     */
+    ///
+    /// \brief Function to leave the monitor
+    ///
+    /// This function has to be called at the end of each function being
+    /// an entry point to the monitor.
+    ///
     void monitorOut();
 
-    /**
-     * This function implements the waiting on a condition, as defined by Hoare.
-     * When the thread is waken by a signal, it continues with the mutual
-     * exclusion.
-     */
+    ///
+    /// \brief Waits unconditionaly on a Condition
+    /// \param cond The condition to wait on
+    ///
+    /// This function implements the waiting on a condition, as defined by Hoare.
+    /// When the thread is waken by a signal, it continues with the mutual
+    /// exclusion.
+    ///
     void wait(Condition &cond);
 
-    /**
-     * This function implements the signaling of a condition, as defined by
-     * Hoare. If no thread is waiting for the condition, then nothing happens,
-     * but if there is one the thread calling signal is suspended, waiting for
-     * the other one to finish.
-     */
+    ///
+    /// \brief Signals a condtion to potentially wake up a thread
+    /// \param cond The condition to signal
+    ///
+    /// This function implements the signaling of a condition, as defined by
+    /// Hoare. If no thread is waiting for the condition, then nothing happens,
+    /// but if there is one the thread calling signal is suspended, waiting for
+    /// the other one to finish.
+    ///
     void signal(Condition &cond);
 
 private:

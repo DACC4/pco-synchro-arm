@@ -82,17 +82,18 @@ public:
 protected:
 
     /// A queue of condition variables for the waiting queue
-    std::queue<std::condition_variable*>  m_waitingCondition;
+    std::queue<std::condition_variable*> m_waitingCondition;
 
     /// An internal mutex to protect the semaphore value
-    std::mutex                           m_mutex;
+    std::mutex m_mutex;
 
     /// The semaphore value
-    int                                 m_value;
+    int m_value;
 
     /// Indicates if the semaphore's waiting list is monitored
     bool m_monitor;
 
+    /// PcoManager is a friend, to simplify its development
     friend PcoManager;
 };
 

@@ -59,6 +59,7 @@ class PcoManager
 {
 public:
 
+    /// An enum to define the type of events on which some actions are executed
     enum class EventType {
         ThreadCreation,         ///< For the thread constructor function
         ThreadJoin,             ///< For the thread join() function
@@ -128,14 +129,42 @@ public:
     ///
     void setWatchDog(PcoWatchDog *watchDog);
 
-    void setNormalMode();
-    void setFreeMode();
-
+    ///
+    /// \brief The Mode of execution for semaphores
+    ///
+    /// A Normal mode means that the registered semaphores behave as expected.
+    /// In Free mode, the semaphore acquire() method is non-blocking.
+    /// It is meant to be used in very specific contexts where at some stage
+    /// the existing semaphores should be freed.
+    ///
+    /// The registered semaphores are the ones created with the monitoring set to true.
+    /// See the PcoSemaphore() constructor for more details.
+    ///
     enum class Mode {
+        /// Normal mode of execution of a semaphore
         Normal,
+        /// Free mode, where registered semaphores are non-blocking
         Free
     };
 
+    ///
+    /// \brief sets the semaphore mode to NormalMode
+    ///
+    void setNormalMode();
+
+    ///
+    /// \brief sets the semaphore mode to FreeMode
+    ///
+    /// When this function is called, all registered semaphores are released, so
+    /// that all threads blocked on them are freed. Then the function acquire() is
+    /// non-blocking.
+    ///
+    void setFreeMode();
+
+    ///
+    /// \brief gets the sempahore mode
+    /// \return The current semaphore mode
+    ///
     Mode getMode();
 
 protected:
@@ -147,6 +176,7 @@ protected:
     ///
     PcoManager();
 
+    /// A destructors freeing memory and releasing resources
     ~PcoManager();
 
     ///
@@ -200,17 +230,43 @@ protected:
     /// A watchdog called when a thread blocks on a synchronization object
     PcoWatchDog *m_watchDog{nullptr};
 
+    /// A vector of PcoSemaphore that are monitored to detect deadlocks
     std::vector<PcoSemaphore *> m_semaphores;
 
+    ///
+    /// \brief registers a semaphore to be used as a free one in case
+    /// \param semaphore The semaphore to register
+    ///
+    /// This function should be called only once a semaphore. It does not
+    /// check for duplicates, but that could be changed in the future.
+    ///
     void registerSemaphore(PcoSemaphore *semaphore);
+
+    ///
+    /// \brief unregisters a semaphore
+    /// \param semaphore The semaphore to unregister
+    ///
+    /// The semaphore has to be already registered thanks to registerSemaphore().
+    /// However if the semaphore is not in the registered list the function
+    /// will end up without warnings.
+    ///
     void unregisterSemaphore(PcoSemaphore *semaphore);
 
+    /// \brief the execution mode of semaphores
+    /// By default, we use the normal mode to have a coherent behavior
     Mode m_mode{Mode::Normal};
 
 
+    /// PcoThread is a friend just to help
     friend PcoThread;
+
+    /// PcoMutex is a friend just to help
     friend PcoMutex;
+
+    /// PcoSemaphore is a friend just to help
     friend PcoSemaphore;
+
+    /// PcoConditionVariable is a friend just to help
     friend PcoConditionVariable;
 
 };
