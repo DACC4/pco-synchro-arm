@@ -41,6 +41,7 @@ public:
 
     /// Sets the verbosity level
     static void setVerbosity(int level) {
+        std::lock_guard<std::mutex> guard(sm_mutex);
         sm_verbosity = level;
     }
 
