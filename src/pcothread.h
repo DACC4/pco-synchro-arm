@@ -70,6 +70,7 @@ public:
     template <class Fn, class... Args>
     explicit PcoThread (Fn&& fn, Args&&... args)
     {
+        m_requestMutex = std::make_unique<std::mutex>();
         m_thread = std::make_unique<std::thread>([=](){
             m_id = std::this_thread::get_id();
             PcoManager::getInstance()->registerThread(this);
@@ -85,7 +86,7 @@ public:
     PcoThread (const PcoThread&) = delete;
 
     /// No copy
-    PcoThread (const PcoThread&&) = delete;
+    PcoThread (PcoThread&&) = default;
 
     /// No copy
     PcoThread& operator= ( const PcoThread & ) = delete;
@@ -155,7 +156,7 @@ protected:
     bool m_stopRequested{false};
 
     /// A mutex to protect the variable m_stopRequested
-    std::mutex m_requestMutex;
+    std::unique_ptr<std::mutex> m_requestMutex;
 
     /// PcoManager is a friend, to simplify its development
     friend PcoManager;

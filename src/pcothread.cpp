@@ -35,13 +35,13 @@ std::thread::id PcoThread::getId()
 
 void PcoThread::requestStop()
 {
-    std::lock_guard guard(m_requestMutex);
+    std::lock_guard guard(*m_requestMutex.get());
     m_stopRequested = true;
 }
 
 bool PcoThread::stopRequested()
 {
-    std::lock_guard guard(m_requestMutex);
+    std::lock_guard guard(*m_requestMutex.get());
     return m_stopRequested;
 }
 

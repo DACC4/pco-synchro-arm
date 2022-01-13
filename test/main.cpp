@@ -431,6 +431,22 @@ TEST(PcoThread, FunctionRef) {
     ASSERT_EQ(number, 1);
 }
 
+void testMove(PcoThread t)
+{
+    t.join();
+}
+
+TEST(PcoThread, Move) {
+    // Req: A thread should be movable.
+
+    int number = 0;
+    PcoThread t1(taskRef, std::ref(number));
+
+    testMove(std::move(t1));
+
+    ASSERT_EQ(number, 1);
+}
+
 TEST(PcoThread, lambdaArgValue) {
     // Req: A thread should execute and finish, letting another one do the join
 
