@@ -21,6 +21,7 @@
 #include <chrono>
 #include <random>
 #include <mutex>
+#include <stdexcept>
 
 #include "pcomanager.h"
 #include "pcothread.h"
