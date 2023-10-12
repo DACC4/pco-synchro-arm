@@ -26,6 +26,7 @@ export LIBRARY_PATH="/usr/local/lib"
 qmake
 
 sed -i .old 's/gnu++11/c++17/g' Makefile
+sed -i .old 's/x86_64/arm64/g' Makefile
 sudo make install
 ```
 
